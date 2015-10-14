@@ -4,6 +4,7 @@ require 'digest'
 
 # TODO: figure out testing - use rspec and timecop!
 # TODO: closing program is a little wonky; only closes program if it's the first line
+# TODO: need to add to cache size each time an element is added
 
 # cache = {
 #   url = { date_stored:
@@ -12,7 +13,7 @@ require 'digest'
 #   }
 # }
 
-class CachingProxy
+class CachingProxyServer
   attr_accessor :cache, :cache_size, :cache_configuration, :ordered_urls, :cache_configuration
 
   def initialize(cache_configuration={})
@@ -27,7 +28,7 @@ class CachingProxy
     server = TCPServer.new 2000
     response = ''
     loop do
-      break if gets.chomp == "exit"
+      # break if gets.chomp == "exit"
       client = server.accept
       url = client.gets
       pathname = parse_url(url)
@@ -38,9 +39,7 @@ class CachingProxy
         response = "You've hit the cache. The response is: #{cached_response}"
       else
         response = "Received response from server: #{fetch_from_source(pathname)}"
-        make_space(response)
-        add_to_cache(hashed_pathname, response)
-        add_to_ordered_urls(url)
+        store_data(pathname, response, hashed_pathname)
       end
 
       client.puts response
@@ -51,7 +50,7 @@ class CachingProxy
   def get_cached_version(pathname)
     if cache[pathname]
       current_time = Time.now.to_i
-      if (current_time - cache[pathname][:date_stored]) < default_configuration[:cacheDuration]
+      if (current_time - cache[pathname][:date_stored]) < cache_configuration[:cacheDuration]
         cache[pathname][:response]
       end
     end
@@ -77,6 +76,15 @@ class CachingProxy
     response
   end
 
+  def store_data(pathname, response, hashed_pathname)
+    unless pathname == '/favicon.ico'
+      make_space(response)
+      add_to_cache(hashed_pathname, response)
+      cache_size = update_cache_size(response)
+      add_to_ordered_urls(hashed_pathname)
+    end
+  end
+
   # get pathname
   def parse_url(url)
     url = url.split(' ')
@@ -84,25 +92,26 @@ class CachingProxy
   end
 
   def hash_pathname(pathname)
-    Digest::MD5.hexdigest(pathname)
+    pathname
+    # Digest::MD5.hexdigest(pathname)
   end
 
   def make_space(response)
-    if too_many_elements_in_cache?
-      ordered_urls.shift
-    elsif not_enough_space?(response)
-      while not_enough_space do
-        ordered_urls.shift
+    if !room_for_more_elements?
+      cache.delete(ordered_urls.shift)
+    elsif !enough_space?(response)
+      while enough_space?(response) do
+        cache.delete(ordered_urls.shift)
       end
     end
   end
 
-  def too_many_elements_in_cache?
-    cache.size < default_configuration[:cacheSizeElements]
+  def room_for_more_elements?
+    cache.size < cache_configuration[:cacheSizeElements]
   end
 
-  def not_enough_space?(response)
-    (response.size + cache_size) < default_configuration[:cacheSizeBytes]
+  def enough_space?(response)
+    (response.size + cache_size) <= cache_configuration[:cacheSizeBytes]
   end
 
   def add_to_cache(url, response)
@@ -111,6 +120,10 @@ class CachingProxy
       size: response.bytesize,
       response: response
     }
+  end
+
+  def update_cache_size(response)
+    cache_size + response.bytesize
   end
 
   def add_to_ordered_urls(url)
@@ -123,9 +136,9 @@ class CachingProxy
     {
       cacheDuration: 30 * 1000, # seconds
       cacheSizeBytes: 1024 * 2, # total size of cache in bytes
-      cacheSizeElements: 50 # total of elements in cache
+      cacheSizeElements: 2 # total of elements in cache
     }
   end
 end
 
-CachingProxy.new.server
+CachingProxyServer.new.server
