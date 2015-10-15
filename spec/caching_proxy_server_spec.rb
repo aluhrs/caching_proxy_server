@@ -1,4 +1,3 @@
-# gem install rspec
 require_relative '../caching_proxy_server.rb'
 require 'timecop'
 
@@ -7,16 +6,16 @@ describe CachingProxyServer do
   let(:cached_pathname) { Digest::MD5.hexdigest('/maps') }
 
   before(:each) do
-    server.cache["#{cached_pathname}"] = {
-        date_stored: Time.now.to_i,
-        size: 1024,
-        response: "This the response",
-      }
+    server.cache[cached_pathname] = {
+                                      date_stored: Time.now.to_i,
+                                      size: 1024,
+                                      response: "This the response",
+                                    }
   end
 
   describe "#parse_url" do
     it "returns the pathname of the url" do
-      expect(server.parse_url("GET /maps HTTP/1.1")).to eq('/maps')
+      expect(server.parse_url("GET /maps HTTP/1.1")).to eq("/maps")
     end
   end
 
@@ -24,11 +23,12 @@ describe CachingProxyServer do
     let(:response) { "this is the response" }
     before(:each) do
       server.ordered_urls = [ cached_pathname ]
+      server.cache_size = 1024
     end
 
     context "too many elements" do
       it "removes an element from the cache" do
-        server.cache_configuration[:cacheSizeElements] = 1
+        server.cache_configuration[:cache_size_elements] = 1
         expect(server.cache.size == 1)
         server.make_space(response)
         expect(server.cache.size == 0)
@@ -37,7 +37,7 @@ describe CachingProxyServer do
 
     context "not enough space" do
       it "removes elements from the cache" do
-        server.cache_configuration[:cacheSizeBytes] = 1
+        server.cache_configuration[:cache_size_bytes] = 30
         expect(server.cache.size == 1)
         server.make_space(response)
         expect(server.cache.size == 0)
@@ -47,7 +47,7 @@ describe CachingProxyServer do
 
   describe "#room_for_more_elements?" do
     it "returns false if the cache has too many elements" do
-      server.cache_configuration[:cacheSizeElements] = 1
+      server.cache_configuration[:cache_size_elements] = 1
       expect(server.room_for_more_elements?).to be false
     end
 
@@ -57,9 +57,13 @@ describe CachingProxyServer do
   end
 
   describe "#enough_space?" do
+    before(:each) do
+      cache_size = 1024
+    end
     let(:response) { "this is the response" }
+
     it "returns false if the cache does not have space" do
-      server.cache_configuration[:cacheSizeBytes] = 1
+      server.cache_configuration[:cache_size_bytes] = 1
       expect(server.enough_space?(response)).to be false
     end
 

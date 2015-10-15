@@ -2,7 +2,7 @@
 
 ##To test:
 
-1. Git clone the project
+1. Clone the project
 2. ```gem install timecop```
 3. ```gem install rspec```
 3. ```rspec spec/caching_proxy_server_spec.rb```
@@ -23,7 +23,7 @@ The cache is set up as so:
   cache = {
     pathname is stored by using MD5 hashing
     hashed_pathname = {
-            date_stored: Time.now, # as an int
+            date_stored: Time.now.to_i, # as an int
             size: 1024,
             response: "this is the response from the destination source"
           }
