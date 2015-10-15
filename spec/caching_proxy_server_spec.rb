@@ -3,14 +3,7 @@ require_relative '../caching_proxy_server.rb'
 require 'timecop'
 
 describe CachingProxyServer do
-  let(:server) { CachingProxyServer.new(
-      {
-        cacheDuration: 30 * 10, # seconds
-        cacheSizeBytes: 1024 * 2, # total size of cache in bytes
-        cacheSizeElements: 2 # total of elements in cache
-      }
-    )
-  }
+  let(:server) { CachingProxyServer.new }
   let(:cached_pathname) { Digest::MD5.hexdigest('/maps') }
 
   before(:each) do
