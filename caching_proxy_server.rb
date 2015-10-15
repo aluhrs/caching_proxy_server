@@ -19,7 +19,7 @@ class CachingProxyServer
   # Open a server connection and accept requests.
   def start_server
     server = TCPServer.new 2000
-    response = ''
+    response = nil
     loop do
       client = server.accept
       url = client.gets
@@ -27,12 +27,11 @@ class CachingProxyServer
       # favicon is returned on every request. it's noisy, so let's ignore it.
       unless pathname == '/favicon.ico'
         hashed_pathname = hash_pathname(pathname)
-        response = nil
         cached_response = get_cached_version(hashed_pathname)
         if cached_response
-          response = "You've hit the cache. The response is: #{cached_response}"
+          response = "You've hit the cache. The response from #{pathname} is: #{cached_response}"
         else
-          response = "Received response from server: #{fetch_from_source(pathname)}"
+          response = "Received response from #{pathname}: #{fetch_from_source(pathname)}"
           store_data(pathname, response, hashed_pathname)
         end
       end
