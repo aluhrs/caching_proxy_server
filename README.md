@@ -1,6 +1,6 @@
 # Transparent Caching Proxy Server
 
-##To test:
+##For testing the test suite:
 
 1. Git clone the project
 2. ```gem install timecop```
@@ -21,7 +21,7 @@ The cache is set up as so:
 
 ```ruby
   cache = {
-    hashed_pathname = {
+    hashed_pathname: {
             date_stored: Time.now, # as an int
             size: 1024,
             response: "this is the response from the destination source"
