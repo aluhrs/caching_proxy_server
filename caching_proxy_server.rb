@@ -2,44 +2,39 @@ require 'socket'
 require 'uri'
 require 'digest'
 
-# TODO: figure out testing - use rspec and timecop!
-# TODO: closing program is a little wonky; only closes program if it's the first line
-# TODO: need to add to cache size each time an element is added
-
-# cache = {
-#   url = { date_stored:
-#   size:
-#   response:
-#   }
-# }
-
 class CachingProxyServer
   attr_accessor :cache, :cache_size, :cache_configuration, :ordered_urls, :cache_configuration
 
-  def initialize(cache_configuration={})
+  def initialize
     @cache = {}
     @cache_size = 0
     @ordered_urls = []
-    @cache_configuration = !cache_configuration.empty? ? cache_configuration : default_configuration
+    @cache_configuration = {
+          cacheDuration: 30 * 1000, # seconds
+          cacheSizeBytes: 1024 * 2, # total size of cache in bytes
+          cacheSizeElements: 2 # total of elements in cache
+        }
   end
 
   # Open a server connection and accept requests.
-  def server
+  def start_server
     server = TCPServer.new 2000
     response = ''
     loop do
-      # break if gets.chomp == "exit"
       client = server.accept
       url = client.gets
       pathname = parse_url(url)
-      hashed_pathname = hash_pathname(pathname)
-      response = nil
-      cached_response = get_cached_version(hashed_pathname)
-      if cached_response
-        response = "You've hit the cache. The response is: #{cached_response}"
-      else
-        response = "Received response from server: #{fetch_from_source(pathname)}"
-        store_data(pathname, response, hashed_pathname)
+      # favicon is returned on every request. it's noisy, so let's ignore it.
+      unless pathname == '/favicon.ico'
+        hashed_pathname = hash_pathname(pathname)
+        response = nil
+        cached_response = get_cached_version(hashed_pathname)
+        if cached_response
+          response = "You've hit the cache. The response is: #{cached_response}"
+        else
+          response = "Received response from server: #{fetch_from_source(pathname)}"
+          store_data(pathname, response, hashed_pathname)
+        end
       end
 
       client.puts response
@@ -77,12 +72,10 @@ class CachingProxyServer
   end
 
   def store_data(pathname, response, hashed_pathname)
-    unless pathname == '/favicon.ico'
-      make_space(response)
-      add_to_cache(hashed_pathname, response)
-      cache_size = update_cache_size(response)
-      add_to_ordered_urls(hashed_pathname)
-    end
+    make_space(response)
+    add_to_cache(hashed_pathname, response)
+    cache_size = update_cache_size(response)
+    add_to_ordered_urls(hashed_pathname)
   end
 
   # get pathname
@@ -129,16 +122,4 @@ class CachingProxyServer
   def add_to_ordered_urls(url)
     ordered_urls << url
   end
-
-  private
-
-  def default_configuration
-    {
-      cacheDuration: 30 * 1000, # seconds
-      cacheSizeBytes: 1024 * 2, # total size of cache in bytes
-      cacheSizeElements: 2 # total of elements in cache
-    }
-  end
 end
-
-CachingProxyServer.new.server
