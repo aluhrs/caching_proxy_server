@@ -24,10 +24,12 @@ class CachingProxyServer
     response = nil
     loop do
       client = server.accept
+      puts "new client: #{client.inspect}"
       url = client.gets
       pathname = parse_url(url)
       # favicon is returned on every request. it's noisy, so let's ignore it.
       unless pathname == '/favicon.ico'
+        puts "pathname: #{pathname}"
         hashed_pathname = hash_pathname(pathname)
         cached_response = get_cached_version(hashed_pathname)
         if cached_response
@@ -44,6 +46,8 @@ class CachingProxyServer
   end
 
   def get_cached_version(pathname)
+    puts "looking for pathname in cache: #{pathname}"
+    puts "getting cache: #{cache.keys}"
     if cache[pathname]
       current_time = Time.now.to_i
       if (current_time - cache[pathname][:date_stored]) < cache_configuration[:cache_duration]
@@ -53,6 +57,7 @@ class CachingProxyServer
   end
 
   def fetch_from_source(pathname)
+    puts "fetching from source"
     # For testing purposes, test against google
     url = "http://www.google.com#{pathname}"
     parsed_url = URI.parse(url)
@@ -91,8 +96,10 @@ class CachingProxyServer
 
   def make_space(response)
     if !room_for_more_elements?
+      puts "not enough room for element"
       delete_from_cache
     elsif !enough_space?(response)
+      puts "not enough space"
       while !enough_space?(response) do
         delete_from_cache
       end
@@ -100,6 +107,7 @@ class CachingProxyServer
   end
 
   def delete_from_cache
+    puts "deleting from cache"
     url_to_delete = ordered_urls.shift
     url_to_delete_size = cache[url_to_delete][:size]
     @cache_size -= url_to_delete_size
@@ -115,6 +123,7 @@ class CachingProxyServer
   end
 
   def add_to_cache(url, response)
+    puts "adding to cache"
     cache[url] = {
                     date_stored: Time.now.to_i,
                     size: response.bytesize,
