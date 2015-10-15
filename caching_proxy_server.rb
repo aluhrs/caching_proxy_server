@@ -85,7 +85,6 @@ class CachingProxyServer
   end
 
   def hash_pathname(pathname)
-    puts "Pathname: #{pathname}" # for testing purposes
     Digest::MD5.hexdigest(pathname)
   end
 
