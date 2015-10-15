@@ -75,8 +75,8 @@ class CachingProxyServer
   def store_data(pathname, response, hashed_pathname)
     make_space(response)
     add_to_cache(hashed_pathname, response)
-    @cache_size = update_cache_size(response)
-    add_to_ordered_urls(hashed_pathname)
+    update_cache_size(response)
+    add_to_ordered_pathnames(hashed_pathname)
   end
 
   # get pathname
@@ -102,12 +102,8 @@ class CachingProxyServer
   def delete_from_cache
     url_to_delete = ordered_urls.shift
     url_to_delete_size = cache[url_to_delete][:size]
-    @cache_size = delete_from_cache_size(url_to_delete_size)
+    @cache_size -= url_to_delete_size
     cache.delete(url_to_delete)
-  end
-
-  def delete_from_cache_size(url_to_delete_size)
-    @cache_size - url_to_delete_size
   end
 
   def room_for_more_elements?
@@ -127,10 +123,15 @@ class CachingProxyServer
   end
 
   def update_cache_size(response)
-    @cache_size + response.bytesize
+    puts "updating cache size"
+    @cache_size += response.bytesize
   end
 
-  def add_to_ordered_urls(url)
-    ordered_urls << url
+  # Keeping an ordered list of the pathnames so that when need to remove from
+  # cache, to get the oldest item, I can simply take the first item in this list
+  # then look it up in the cache and remove it.
+  def add_to_ordered_pathnames(pathname)
+    puts "adding to ordered urls"
+    ordered_urls << pathname
   end
 end

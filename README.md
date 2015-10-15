@@ -3,8 +3,7 @@
 ##For testing the test suite:
 
 1. Clone the project
-2. ```gem install timecop```
-3. ```gem install rspec```
+2. ```bundle install```
 3. ```rspec spec/caching_proxy_server_spec.rb```
 
 ##To manually test:
