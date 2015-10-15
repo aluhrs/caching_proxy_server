@@ -85,8 +85,8 @@ class CachingProxyServer
   end
 
   def hash_pathname(pathname)
-    pathname
-    # Digest::MD5.hexdigest(pathname)
+    puts "Pathname: #{pathname}" # for testing purposes
+    Digest::MD5.hexdigest(pathname)
   end
 
   def make_space(response)
