@@ -21,7 +21,6 @@ The cache is set up as so:
 
 ```ruby
   cache = {
-    pathname is stored by using MD5 hashing
     hashed_pathname = {
             date_stored: Time.now, # as an int
             size: 1024,
