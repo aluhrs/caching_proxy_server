@@ -11,10 +11,11 @@ class CachingProxyServer
     @cache_size = 0
     # used for easy lookup to the cache hash
     @ordered_urls = []
+    # keeping elements low for testing purposes
     @cache_configuration = {
                               cache_duration: 30 * 1000, # seconds
-                              cache_size_bytes: 1024 * 1000, # total size of cache in bytes
-                              cache_size_elements: 2 # total of elements in cache
+                              cache_size_bytes: 1024 * 10000, # total size of cache in bytes
+                              cache_size_elements: 2 # total # of elements in cache
                             }
   end
 

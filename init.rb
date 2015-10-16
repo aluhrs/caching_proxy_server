@@ -6,7 +6,8 @@ while true
   if command == 'exit'
     abort("Closing program")
   elsif command == "run server"
-    puts "Opening server connection. Please open a browser window and type in: localhost:2000/<something> ex: localhost:2000/maps"
+    puts "Opening server connection. A browser window should open, but if not, please open a browser window and type in: localhost:2000/<something> ex: localhost:2000/images"
+    `open http://localhost:2000/images`
     CachingProxyServer.new.start_server
   end
 end

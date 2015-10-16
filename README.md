@@ -30,5 +30,5 @@ The cache is set up as so:
         }
 ```
 
-Extra TODOs:
-1) Use Net::HTTP for automated integration testing.
+Possible Enhancements:
+Test hitting the server by using Net::HTTP for automated integration testing.
