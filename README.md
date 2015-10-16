@@ -10,6 +10,8 @@
 
 ##Manual Integration Testing:
 
+*Note: These are not intended to be working URLs. They're just for testing purposes.*
+
 1. Run the program: ```ruby init.rb```
 2. A browser directed to localhost:2000/one should open for you. It may take a second to load. It should respond with 'Received response from server:' as well as the response from http://google.com/one.
 3. Testing for elements in cache:
@@ -20,7 +22,7 @@
    - Make one request and then waiting ~2 minutes to make the next request. It should result in 'Received response from server:'.
 5. Testing for bytesize:
    - There are print statements in the console alerting you to how much space is left. Once the limit is reached, the oldest item in the cache is removed. There will also be a print statement in the console alerting you that an item has been removed.
-   - Another way to test this is to lower the cache bytesize to a small number. When running the program, with the first page opening, it should immediately hit the limit. Making the same request should respond with 'Received response from server:' as the prior response failed to saved to the cached.
+   - Another way to test this is to lower the cache bytesize to a small number. When running the program, with the first page opening, it should immediately hit the limit. Making the same request should respond with 'Received response from server:' as the prior response failed to save to the cached.
 6. Exit program by using ctrl c.
 
 Notes:
