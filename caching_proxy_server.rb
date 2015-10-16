@@ -11,9 +11,9 @@ class CachingProxyServer
     @cache_size = 0
     # used for easy lookup to the cache hash
     @ordered_urls = []
-    # keeping elements low for testing purposes
+    # keeping elements and duration low for testing purposes
     @cache_configuration = {
-                              cache_duration: 30 * 1000, # seconds
+                              cache_duration: 120, # seconds
                               cache_size_bytes: 1024 * 10000, # total size of cache in bytes
                               cache_size_elements: 2 # total # of elements in cache
                             }
@@ -60,7 +60,7 @@ class CachingProxyServer
   # the destination source.
   def proceed?(source_time)
     current_time = Time.now.to_i
-    source_time ? ((current_time - source_time) > 1) : true
+    source_time ? ((current_time - source_time) >= 1) : true
   end
 
   def get_cached_version(pathname)
@@ -120,19 +120,19 @@ class CachingProxyServer
     end
   end
 
-  def delete_from_cache
-    url_to_delete = ordered_urls.shift
-    url_to_delete_size = cache[url_to_delete][:size]
-    @cache_size -= url_to_delete_size
-    cache.delete(url_to_delete)
-  end
-
   def room_for_more_elements?
     cache.size < cache_configuration[:cache_size_elements]
   end
 
   def enough_space?(response)
     (response.bytesize + @cache_size) <= cache_configuration[:cache_size_bytes]
+  end
+
+  def delete_from_cache
+    url_to_delete = ordered_urls.shift
+    url_to_delete_size = cache[url_to_delete][:size]
+    @cache_size -= url_to_delete_size
+    cache.delete(url_to_delete)
   end
 
   def add_to_cache(url, response)

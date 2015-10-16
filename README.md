@@ -10,11 +10,12 @@
 
 ##Manual Integration Testing:
 
-1. Run the program - ```ruby init.rb``` It will prompt you, but the information is also below.
-2. Open a browser.
-3. Type in localhost:2000/one (or anything after the slash). It should respond with a response as well as 'Received response from server:'
-4. After the / type in anything else. It should respond with a response as well as 'Received response from server:'
-5. Type in /maps (or the first thing you typed again). It should respond with a response as well as 'You've hit the cache.'
+1. Run the program: ```ruby init.rb```
+2. A browser directed to localhost:2000/one should open for you. It may take a second to load. It should respond with 'Received response from server:' as well as the response from http://google.com/one.
+3. Type in localhost:2000/two (or anything after the slash). It should respond with 'Received response from server:' as well as the response from http://google.com/two.
+4. Since the maximum elements in the cache is set to 2, if type in localhost:2000/one again, it should respond with 'You've hit the cache' as well as the cached response.
+5. Similar testing can be done for duration and bytesize, eg make one request and then waiting ~2 minutes to make the next request.
+6. Exit program by using ctrl c.
 
 Notes:
 
@@ -23,12 +24,12 @@ The cache is set up as so:
 ```ruby
   cache = {
             hashed_pathname: {
-                date_stored: Time.now.to_i, # force into an int
-                size: 1024,
-                response: "this is the response from the destination source"
-              }
-        }
+              date_stored: Time.now.to_i, # force into an int
+              size: 1024,
+              response: "This is the response from the destination source."
+            }
+          }
 ```
 
 Possible Enhancements:
-Test hitting the server by using Net::HTTP for automated integration testing.
+1. Test hitting the server by using Net::HTTP for automated integration testing.
