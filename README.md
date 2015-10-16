@@ -25,7 +25,7 @@
    - Another way to test this is to lower the cache bytesize to a small number. When running the program, with the first page opening, it should immediately hit the limit. Making the same request should respond with 'Received response from server:' as the prior response failed to save to the cached.
 6. Exit program by using ctrl c.
 
-Notes:
+##Notes:
 
 The cache is set up as:
 
@@ -39,5 +39,5 @@ The cache is set up as:
           }
 ```
 
-Possible Enhancements:
+##Possible Enhancements:
 - Test hitting the server by using Net::HTTP for automated integration testing.
