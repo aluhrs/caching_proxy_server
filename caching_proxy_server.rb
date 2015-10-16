@@ -14,7 +14,7 @@ class CachingProxyServer
     # keeping elements and duration low for testing purposes
     @cache_configuration = {
                               cache_duration: 120, # seconds
-                              cache_size_bytes: 1024 * 10000, # total size of cache in bytes
+                              cache_size_bytes: 1024 * 1000, # total size of cache in bytes
                               cache_size_elements: 2 # total # of elements in cache
                             }
   end
@@ -93,10 +93,11 @@ class CachingProxyServer
   end
 
   def store_data(pathname, response, hashed_pathname)
-    make_space(response)
-    add_to_cache(hashed_pathname, response)
-    update_cache_size(response)
-    add_to_ordered_pathnames(hashed_pathname)
+    if make_space(response) != false
+      add_to_cache(hashed_pathname, response)
+      update_cache_size(response)
+      add_to_ordered_pathnames(hashed_pathname)
+    end
   end
 
   # Get pathname
@@ -111,6 +112,8 @@ class CachingProxyServer
   end
 
   def make_space(response)
+    return false if too_big_for_total_cache?(response)
+
     if !room_for_more_elements?
       delete_from_cache
     elsif !enough_space?(response)
@@ -118,6 +121,15 @@ class CachingProxyServer
         delete_from_cache
       end
     end
+  end
+
+  # If the response is too big for the total cache size, let's not cache it.
+  def too_big_for_total_cache?(response)
+    # Adding print statments for testing purposes.
+    puts "Response Bytesize: #{response.bytesize}"
+    puts "Cache Bytesize: #{@cache_size}"
+    puts "Room left in cache BEFORE adding current response: #{cache_configuration[:cache_size_bytes] - @cache_size}"
+    response.bytesize > cache_configuration[:cache_size_bytes]
   end
 
   def room_for_more_elements?
@@ -133,6 +145,7 @@ class CachingProxyServer
     url_to_delete_size = cache[url_to_delete][:size]
     @cache_size -= url_to_delete_size
     cache.delete(url_to_delete)
+    puts "Item was removed from cache"
   end
 
   def add_to_cache(url, response)
