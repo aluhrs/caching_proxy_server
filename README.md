@@ -23,10 +23,10 @@ The cache is set up as so:
 ```ruby
   cache = {
             hashed_pathname: {
-                                date_stored: Time.now, # as an int
-                                size: 1024,
-                                response: "this is the response from the destination source"
-                              }
+                date_stored: Time.now.to_i, # force into an int
+                size: 1024,
+                response: "this is the response from the destination source"
+              }
         }
 ```
 
